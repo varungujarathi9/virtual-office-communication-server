@@ -1,0 +1,24 @@
+{
+  "name": "virtual-office-communication-server",
+  "version": "1.0.0",
+  "description": "virtual communication office",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/varungujarathi9/virtual-office-communication-server.git"
+  },
+  "author": "Varun Gujarathi, Jayesh Choudhari",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/varungujarathi9/virtual-office-communication-server/issues"
+  },
+  "homepage": "https://github.com/varungujarathi9/virtual-office-communication-server#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "jslint": "^0.12.1",
+    "mongodb": "^3.6.4"
+  }
+}
