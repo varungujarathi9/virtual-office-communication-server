@@ -1,7 +1,7 @@
 // "use strict";
 const express = require('express')
 const app = express()
-const port = 8000
+const port = process.env.PORT || 8000
 
 app.use(express.json())
 
@@ -14,5 +14,5 @@ app.post('/register',(req,res)=>{
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
+  console.log(`Example app listening at ${port}`)
 })
