@@ -1,4 +1,4 @@
-"use strict";
+// "use strict";
 // import modules
 var MongoClient = require('mongodb').MongoClient;
 var configs = require("../configs.json");
