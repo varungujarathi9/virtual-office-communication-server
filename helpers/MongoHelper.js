@@ -1,5 +1,4 @@
-use strict;
-...
+"use strict";
 // import modules
 var MongoClient = require('mongodb').MongoClient;
 var configs = require("../configs.json");
@@ -8,7 +7,7 @@ var configs = require("../configs.json");
 var mongoHost = configs["mongo-db-host"];
 
 insert = (jsonVar) =>{
-    use strict MongoClient.connect(mongoHost, (err, db) =>{
+    MongoClient.connect(mongoHost, (err, db) => {
         if (err) throw err;
 
         var dbo = db.db(configs["mongo-db-name"]);
