@@ -11,6 +11,7 @@ app.get('/',(req,res)=>{
 
 app.post('/register',(req,res)=>{
   console.log(req.body)
+  res.send({"registration-status":"successful"})
 })
 
 app.listen(port, () => {
