@@ -20,5 +20,8 @@
   "dependencies": {
     "express": "^4.17.1",
     "mongodb": "^3.6.4"
+  },
+  "engines": {
+    "node": "12.8.1"
   }
 }
