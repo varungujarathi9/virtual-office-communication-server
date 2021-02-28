@@ -1,4 +1,5 @@
 {
     "mongo-db-host": "mongodb://localhost:27017/",
-    "mongo-db-name": "virtual_office"
+    "mongo-db-name": "virtual-office-communication",
+    "mongo-user-collection": "users"
 }
