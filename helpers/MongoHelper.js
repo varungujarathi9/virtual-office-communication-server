@@ -8,62 +8,74 @@ var mongoHost = configs["mongo-db-host"]
 var mongoDbName = configs["mongo-db-name"]
 
 module.exports = {
-    insertOne: function(jsonData, tableName){
+    insertOne: function(jsonData, collection){
         MongoClient.connect(mongoHost, (err, db) => {
             if (err) throw err;
 
             var dbo = db.db(mongoDbName);
-            dbo.collection(tableName).insertOne(jsonData, (err, res) => {
+            dbo.collection(collection).insertOne(jsonData, (err, res) => {
                 if (err) throw err;
                 console.log("1 document inserted");
                 db.close();
             })
         })
     },
-    insertMany: function(jsonData, tableName){
+    insertMany: function(jsonData, collection){
         MongoClient.connect(mongoHost, (err, db) => {
             if (err) throw err;
 
             var dbo = db.db(mongoDbName);
-            dbo.collection(tableName).insertMany(jsonData, (err, res) => {
+            dbo.collection(collection).insertMany(jsonData, (err, res) => {
                 if (err) throw err;
-                console.log("documents inserted");
+                console.log(res);
                 db.close();
             })
         })
     },
-    find: function(key, value, tableName){
+    find: function(key, value, collection){
         MongoClient.connect(mongoHost, (err, db) => {
             if (err) throw err;
 
             var dbo = db.db(mongoDbName);
-            dbo.collection(tableName).find({key:value}).toArray((err, res) => {
+            dbo.collection(collection).find({key:value}).toArray((err, res) => {
                 if (err) throw err;
-                console.log(result);
+                console.log(res);
                 db.close();
-                return result
+                return res
             })
         })
     },
-    findIn: function(key, list, tableName){
+    findIn: function(key, list, collection){
         MongoClient.connect(mongoHost, (err, db) => {
             if (err) throw err;
 
             var dbo = db.db(mongoDbName);
-            dbo.collection(tableName).find({key:{$in: list}}).toArray((err, res) => {
+            dbo.collection(collection).find({key:{$in: list}}).toArray((err, res) => {
                 if (err) throw err;
-                console.log(result);
+                console.log(res);
                 db.close();
-                return result
+                return res
             })
         })
     },
-    exists: function(key, value, tableName){
+    updateOne: function(filterKey, filterValue, updateKey, updateValue, collection){
         MongoClient.connect(mongoHost, (err, db) => {
             if (err) throw err;
 
             var dbo = db.db(mongoDbName);
-            var exists_count = dbo.collection(tableName).find({key:value}).count()
+            dbo.collection(collection).updateOne({filterKey:filterValue}, {$set: {updateKey:updateValue}}, (err, res) => {
+                if (err) throw err;
+                console.log(res);
+                db.close();
+            })
+        })
+    },
+    exists: function(key, value, collection){
+        MongoClient.connect(mongoHost, (err, db) => {
+            if (err) throw err;
+
+            var dbo = db.db(mongoDbName);
+            var exists_count = dbo.collection(collection).find({key:value}).count()
             if (exists_count > 0){
                 return true
             }
