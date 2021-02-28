@@ -60,8 +60,4 @@ module.exports = {
 
         })
     }
-
-    usernameCheck: function(key, value, tableName){
-        
-    }
 }
