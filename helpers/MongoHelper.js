@@ -70,12 +70,12 @@ module.exports = {
             })
         })
     },
-    exists: function(key, value, collection){
+    exists: function(jsonData, collection){
         MongoClient.connect(mongoHost, (err, db) => {
             if (err) throw err;
 
             var dbo = db.db(mongoDbName);
-            var exists_count = dbo.collection(collection).find({key:value}).count()
+            var exists_count = dbo.collection(collection).find(jsonData).count()
             if (exists_count > 0){
                 return true
             }
