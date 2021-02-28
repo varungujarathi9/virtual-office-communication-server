@@ -70,8 +70,8 @@ app.post('/login',(req,res)=>{
         }
       }
     }
-    catch() {
-      
+    catch(err) {
+      loginResponse["login-status"] = "unsuccessful"
     }
   }
 })
