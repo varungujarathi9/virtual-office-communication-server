@@ -31,7 +31,7 @@ app.post('/register',(req,res)=>{
             // create list of groups the user is added in, initially it would be none
             req.body["groups"] = {}
             // insert into the DB
-            mongoHelper.insert(req.body, userCollection)
+            mongoHelper.insertOne(req.body, userCollection)
             registrationResponse["status"] = "successful"
           }
           catch(err){
@@ -70,8 +70,8 @@ app.post('/login',(req,res)=>{
   var loginResponse = {}
   if(req.body.hasOwnProperty('username') && req.body.hasOwnProperty('password')) {
     try {
-      if(mongoHelper.exists("username",req.body["username"],"users") == true){
-        if(mongoHelper.exists("password",req.body["password"],"users") == true){
+      if(mongoHelper.exists({"username":req.body["username"]},"users").then() == true){
+        if(mongoHelper.exists({"username":req.body["username"], "password": req.body["password"]},"users") == true){
           loginResponse["status"] = "successful"
         }
         else{
@@ -105,33 +105,53 @@ app.post('/login',(req,res)=>{
 // add in group
 app.post('/add-member',(req,res)=>{
   console.log("Request : " + JSON.stringify(req.body))
-  var getAllGroupsResponse = {}
+  var addMemberResponse = {}
   if(req.body.hasOwnProperty('username') && req.body.hasOwnProperty('add-username') && req.body.hasOwnProperty('group-name')) {
     try {
-      // check 
-      if(mongoHelper.exists("username",req.body["username"], "users") == true){
-        if(mongoHelper.exits("group-name", req.body("group-name"), "groups") == true){
+      // check if username is valid
+      if(mongoHelper.exists({"username":req.body["username"]}, "users") == true){
+        // check if group-name exists
+        if(mongoHelper.exists({"group-name": req.body("group-name")}, "groups") == true){
           // get list of all members in group
           membersList = mongoHelper.find("group-name", req.body("group-name"), "groups")["members"]
-          // append group member
-          // update the document in collection
-          mongoHelper
+          // check if member is not already added
+          if(membersList.includes(req.body["add-username"]) == true){
+            addMemberResponse["status"] = "unsuccessful"
+            addMemberResponse["reason"] = "member already added"
+          }
+          else{
+            // append group member
+            membersList.push(req.body["add-username"])
+            // update the document in collection
+            mongoHelper.updateOne("group-name", req.body["group-name"], "members", membersList, "groups")
+
+            addMemberResponse["status"] = "successful"
+          }
+        }
+        else{
+          addMemberResponse["status"] = "unsuccessful"
+          addMemberResponse["reason"] = "group does not exist"
         }
       }
       else{
-
+        addMemberResponse["status"] = "unsuccessful"
+        addMemberResponse["reason"] = "invalid username"
       }
     }
     catch(err) {
-      getAllGroupsResponse["status"] = "unsuccessful"
-      getAllGroupsResponse["reason"] = err
+      addMemberResponse["status"] = "unsuccessful"
+      addMemberResponse["reason"] = err
     }
   }
   else{
     // the request body doesnt have all parameters for this endpoint
-    getAllGroupsResponse["status"] = "unsuccessful"
-    getAllGroupsResponse["reason"] = "incorrect form data"
+    addMemberResponse["status"] = "unsuccessful"
+    addMemberResponse["reason"] = "incorrect form data"
   }
+
+  // send response
+  console.log("Response: " + JSON.stringify(addMemberResponse))
+  res.send(addMemberResponse)
 })
 
 // group details
@@ -140,7 +160,7 @@ app.post('/get-all-groups',(req,res)=>{
   var getAllGroupsResponse = {}
   if(req.body.hasOwnProperty('username')) {
     try {
-      if(mongoHelper.exists("username",req.body["username"], "users") == true){
+      if(mongoHelper.exists({"username":req.body["username"]}, "users") == true){
         //  get group names
         groupNames = mongoHelper.find("username", req.body["username"], "users")["groups"]
 
@@ -166,7 +186,42 @@ app.post('/get-all-groups',(req,res)=>{
     getAllGroupsResponse["status"] = "unsuccessful"
     getAllGroupsResponse["reason"] = "incorrect form data"
   }
+
+  // send response
+  console.log("Response: " + JSON.stringify(getAllGroupsResponse))
+  res.send(getAllGroupsResponse)
 })
+
+app.post('/create-group', (req,res)=> {
+  console.log("Request : " + JSON.stringify(req.body))
+  var createGroupResponses = {}
+
+  if(req.body.hasOwnProperty("username") && req.body.hasOwnProperty("group-name")) {
+    try {
+      // check if username in valid
+      if(mongoHelper.exists({"username":req.body["username"]}, "users") == true) {
+        // check if group name is not taken already
+        if(mongoHelper.exists({"group-name": req.body("group-name")}, "groups") == false) {
+          mongoHelper.insertOne({"group-name":req.body["group-name"], "members" : [req.body["username"]]}, "groups")
+          createGroupResponses["status"] = "successful"
+        }
+        else {
+          createGroupResponses["status"] = "unsuccessful"
+          createGroupResponses["reason"] = "group name is already taken"
+        }
+      }
+    }
+    catch(err){
+      createGroupResponses["status"] = "unsuccessful"
+      createGroupResponses["reason"] = err
+    }
+  }
+
+  // send response
+  console.log("Response: " + JSON.stringify(createGroupResponses))
+  res.send(createGroupResponses)
+})
+
 
 app.listen(port, () => {
   console.log(`App listening at ${port}`)
