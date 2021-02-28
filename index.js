@@ -118,7 +118,7 @@ app.post('/add-in-group',(req,res)=>{
 
       }
       else{
-
+        
       }
     }
     catch(err) {
@@ -164,6 +164,34 @@ app.post('/get-all-groups',(req,res)=>{
     getAllGroupsResponse["reason"] = "incorrect form data"
   }
 })
+
+app.post('/create-group', (req,res)=> {
+  console.log("Request : " + JSON.stringify(req.body))
+  var groupResponses = {}
+  
+  if(req.body.hasOwnProperty("username") && req.body.hasOwnProperty("group-name")) {
+
+    //
+    if(mongoHelper.exists("username",req.body["username"], "users") == true) {
+      var groupNames = mongoHelper.find("username", req.body["username"], "users")["groups"]
+      try {
+        if(mongoHelper.exists("group-name", req.body("group-name"), "groups") == false) {
+          groups[req.body["group-name"]] = 1
+          groupResponses["status"] = "successful"
+        }
+        else {
+          groupResponses["status"] = "unsuccessful"
+          groupResponses["reason"] = "group with same name and you as member already exists"
+        }
+      }
+      catch(err){
+        groupResponses["status"] = "unsuccessful"
+        groupResponses["reason"] = err
+      }
+    }
+  }
+})
+
 
 app.listen(port, () => {
   console.log(`App listening at ${port}`)
