@@ -45,6 +45,19 @@ module.exports = {
             })
         })
     },
+    findIn: function(key, list, tableName){
+        MongoClient.connect(mongoHost, (err, db) => {
+            if (err) throw err;
+
+            var dbo = db.db(mongoDbName);
+            dbo.collection(tableName).find({key:{$in: list}}).toArray((err, res) => {
+                if (err) throw err;
+                console.log(result);
+                db.close();
+                return result
+            })
+        })
+    },
     exists: function(key, value, tableName){
         MongoClient.connect(mongoHost, (err, db) => {
             if (err) throw err;

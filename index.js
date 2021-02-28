@@ -28,6 +28,8 @@ app.post('/register',(req,res)=>{
         // check if email is already taken
         if(mongoHelper.exists("email", req.body["email"], "users") == false){
           try{
+            // create list of groups the user is added in, initially it would be none
+            req.body["groups"] = {}
             // insert into the DB
             mongoHelper.insert(req.body, userCollection)
             registrationResponse["status"] = "successful"
@@ -65,7 +67,7 @@ app.post('/register',(req,res)=>{
 // user login endpoint
 app.post('/login',(req,res)=>{
   console.log("Request : " + JSON.stringify(req.body))
-  var loginResponse = {}
+  var loginResponse = []
   if(req.body.hasOwnProperty('username') && req.body.hasOwnProperty('password')) {
     try {
       if(mongoHelper.exists("username",req.body["username"],"users") == true){
@@ -99,15 +101,53 @@ app.post('/login',(req,res)=>{
   res.send(loginResponse)
 })
 
-//  group details
+// add in group
+app.post('/add-in-group',(req,res)=>{
+  console.log("Request : " + JSON.stringify(req.body))
+  var getAllGroupsResponse = {}
+  if(req.body.hasOwnProperty('username') && req.body.hasOwnProperty('add-username')) {
+    try {
+      if(mongoHelper.exists("username",req.body["username"], "users") == true){
+        //  get group names
+        groupNames = mongoHelper.find("username", req.body["username"], "users")["groups"]
+
+        //  get group details
+        groupDetails = mongoHelper.findIn("group-name", groupNames, "groups")
+
+        getAllGroupsResponse["status"] = "successful"
+
+      }
+      else{
+
+      }
+    }
+    catch(err) {
+      getAllGroupsResponse["status"] = "unsuccessful"
+      getAllGroupsResponse["reason"] = err
+    }
+  }
+  else{
+    // the request body doesnt have all parameters for this endpoint
+    getAllGroupsResponse["status"] = "unsuccessful"
+    getAllGroupsResponse["reason"] = "incorrect form data"
+  }
+})
+
+// group details
 app.post('/get-all-groups',(req,res)=>{
   console.log("Request : " + JSON.stringify(req.body))
   var getAllGroupsResponse = {}
   if(req.body.hasOwnProperty('username')) {
     try {
-      if(mongoHelper.exists("username",req.body["username"],"users") == true){
-        mongoHelper.find("username", req.body["username"])
+      if(mongoHelper.exists("username",req.body["username"], "users") == true){
+        //  get group names
+        groupNames = mongoHelper.find("username", req.body["username"], "users")["groups"]
+
+        //  get group details
+        groupDetails = mongoHelper.findIn("group-name", groupNames, "groups")
+
         getAllGroupsResponse["status"] = "successful"
+
       }
       else{
 
