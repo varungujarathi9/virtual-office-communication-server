@@ -24,14 +24,20 @@ app.post('/register',(req,res)=>{
     // check if username is already taken
     try{
       if (mongoHelper.exists("username", req.body["username"], "users") == false){
-        try{
-          mongoHelper.insert(req.body, userCollection)
-          registrationResponse["registration-status"] = "successful"
+        if(mongoHelper.exists("email", req.body["email"], "users") == false){
+          try{
+            mongoHelper.insert(req.body, userCollection)
+            registrationResponse["registration-status"] = "successful"
+          }
+          catch(err){
+            console.log(err)
+            registrationResponse["registration-status"] = "unsuccessful"
+            registrationResponse["reason"] = err
+          }
         }
-        catch(err){
-          console.log(err)
+        else{
           registrationResponse["registration-status"] = "unsuccessful"
-          registrationResponse["reason"] = err
+          registrationResponse["reason"] = "email already exists"
         }
       }
       else{
@@ -54,8 +60,20 @@ app.post('/register',(req,res)=>{
 })
 
 app.post('/login',(req,res)=>{
-  console.log(req.body)
-  res.send({"login-status":"successful"})
+  console.log("Request : " + JSON.stringify(req.body))
+  var loginResponse = {}
+  if(req.body.hasOwnProperty('username') && req.body.hasOwnProperty('password')) {
+    try {
+      if(mongoHelper.exists("username",req.body["username"],"users") == true){
+        if(mongoHelper.exists("password",req.body["password"],"users") == true){
+          loginResponse["login-status"] = "successful"
+        }
+      }
+    }
+    catch() {
+      
+    }
+  }
 })
 
 app.listen(port, () => {
