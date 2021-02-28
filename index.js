@@ -70,7 +70,7 @@ app.post('/login',(req,res)=>{
   var loginResponse = {}
   if(req.body.hasOwnProperty('username') && req.body.hasOwnProperty('password')) {
     try {
-      if(mongoHelper.exists({"username":req.body["username"]},"users") == true){
+      if(mongoHelper.exists({"username":req.body["username"]},"users").then() == true){
         if(mongoHelper.exists({"username":req.body["username"], "password": req.body["password"]},"users") == true){
           loginResponse["status"] = "successful"
         }

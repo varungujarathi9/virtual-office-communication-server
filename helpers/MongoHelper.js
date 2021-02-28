@@ -1,6 +1,7 @@
 // "use strict";
 // import modules
 var MongoClient = require('mongodb').MongoClient
+
 var configs = require("../configs.json")
 
 // declare and initiate variables
@@ -75,14 +76,20 @@ module.exports = {
             if (err) throw err;
 
             var dbo = db.db(mongoDbName);
-            var exists_count = dbo.collection(collection).find(jsonData).count()
-            if (exists_count > 0){
-                return true
-            }
-            else{
-                return false
-            }
-
+            var dbResponse = dbo.collection(collection).find(jsonData).toArray((err, res) => {
+                if (err) throw err;
+                console.log(res.length);
+                db.close();
+                if (res.length > 0){
+                    console.log("true");
+                    return true
+                }
+                else{
+                    return false
+                }
+            })
+            console.log("dbResponse: " + dbResponse)
         })
+        console.log("exists function end")
     }
 }
