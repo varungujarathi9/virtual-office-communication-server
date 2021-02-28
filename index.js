@@ -67,7 +67,7 @@ app.post('/register',(req,res)=>{
 // user login endpoint
 app.post('/login',(req,res)=>{
   console.log("Request : " + JSON.stringify(req.body))
-  var loginResponse = []
+  var loginResponse = {}
   if(req.body.hasOwnProperty('username') && req.body.hasOwnProperty('password')) {
     try {
       if(mongoHelper.exists("username",req.body["username"],"users") == true){
@@ -98,24 +98,25 @@ app.post('/login',(req,res)=>{
   }
 
   // send response
+  console.log("Response: " + JSON.stringify(loginResponse))
   res.send(loginResponse)
 })
 
 // add in group
-app.post('/add-in-group',(req,res)=>{
+app.post('/add-member',(req,res)=>{
   console.log("Request : " + JSON.stringify(req.body))
   var getAllGroupsResponse = {}
-  if(req.body.hasOwnProperty('username') && req.body.hasOwnProperty('add-username')) {
+  if(req.body.hasOwnProperty('username') && req.body.hasOwnProperty('add-username') && req.body.hasOwnProperty('group-name')) {
     try {
+      // check 
       if(mongoHelper.exists("username",req.body["username"], "users") == true){
-        //  get group names
-        groupNames = mongoHelper.find("username", req.body["username"], "users")["groups"]
-
-        //  get group details
-        groupDetails = mongoHelper.findIn("group-name", groupNames, "groups")
-
-        getAllGroupsResponse["status"] = "successful"
-
+        if(mongoHelper.exits("group-name", req.body("group-name"), "groups") == true){
+          // get list of all members in group
+          membersList = mongoHelper.find("group-name", req.body("group-name"), "groups")["members"]
+          // append group member
+          // update the document in collection
+          mongoHelper
+        }
       }
       else{
 
@@ -147,10 +148,12 @@ app.post('/get-all-groups',(req,res)=>{
         groupDetails = mongoHelper.findIn("group-name", groupNames, "groups")
 
         getAllGroupsResponse["status"] = "successful"
+        getAllGroupsResponse["groups"] = groupDetails
 
       }
       else{
-
+        getAllGroupsResponse["status"] = "unsuccessful"
+        getAllGroupsResponse["reason"] = "invalid username"
       }
     }
     catch(err) {
