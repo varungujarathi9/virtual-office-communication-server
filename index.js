@@ -108,14 +108,16 @@ app.post('/add-member',(req,res)=>{
   var getAllGroupsResponse = {}
   if(req.body.hasOwnProperty('username') && req.body.hasOwnProperty('add-username') && req.body.hasOwnProperty('group-name')) {
     try {
-      // check 
+      // check if username is valid
       if(mongoHelper.exists("username",req.body["username"], "users") == true){
-        if(mongoHelper.exits("group-name", req.body("group-name"), "groups") == true){
+        // check if group-name exists
+        if(mongoHelper.exists("group-name", req.body("group-name"), "groups") == true){
           // get list of all members in group
           membersList = mongoHelper.find("group-name", req.body("group-name"), "groups")["members"]
           // append group member
+          membersList.push(req.body["add-username"])
           // update the document in collection
-          mongoHelper
+          mongoHelper.updateOne("group-name", req.body["group-name"], "members", membersList, "groups")
         }
       }
       else{
