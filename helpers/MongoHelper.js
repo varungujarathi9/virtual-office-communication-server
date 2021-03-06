@@ -8,56 +8,78 @@ var configs = require("../configs.json")
 var mongoHost = configs["mongo-db-host"]
 var mongoDbName = configs["mongo-db-name"]
 
+
 module.exports = {
-    insertOne: function(jsonData, collection){
+    insertOne: function(jsonQuery, collection){
         MongoClient.connect(mongoHost, (err, db) => {
             if (err) throw err;
 
             var dbo = db.db(mongoDbName);
-            dbo.collection(collection).insertOne(jsonData, (err, res) => {
+            dbo.collection(collection).insertOne(jsonQuery, (err, res) => {
                 if (err) throw err;
                 console.log("1 document inserted");
                 db.close();
             })
         })
     },
-    insertMany: function(jsonData, collection){
+    insertMany: function(jsonQuery, collection){
         MongoClient.connect(mongoHost, (err, db) => {
             if (err) throw err;
 
             var dbo = db.db(mongoDbName);
-            dbo.collection(collection).insertMany(jsonData, (err, res) => {
+            dbo.collection(collection).insertMany(jsonQuery, (err, res) => {
                 if (err) throw err;
                 console.log(res);
                 db.close();
             })
         })
     },
-    find: function(key, value, collection){
-        MongoClient.connect(mongoHost, (err, db) => {
-            if (err) throw err;
+    find: async function(key, value, collection){
+        let result
+        try{
+            // connect to mongo host
+            var mongoClient = MongoClient(mongoHost, {useUnifiedTopology: true})
+            await mongoClient.connect()
 
-            var dbo = db.db(mongoDbName);
-            dbo.collection(collection).find({key:value}).toArray((err, res) => {
-                if (err) throw err;
-                console.log(res);
-                db.close();
-                return res
-            })
-        })
+            // connect to DB
+            let dbo = mongoClient.db(mongoDbName)
+            // select mongo collection
+            let output = await dbo.collection(collection).findOne({key:value})
+
+            result = output
+        }
+        catch(err){
+            console.log(err)
+            result  = false
+        }
+        finally{
+            await mongoClient.close();
+            return await Promise.resolve(result)
+        }
     },
-    findIn: function(key, list, collection){
-        MongoClient.connect(mongoHost, (err, db) => {
-            if (err) throw err;
 
-            var dbo = db.db(mongoDbName);
-            dbo.collection(collection).find({key:{$in: list}}).toArray((err, res) => {
-                if (err) throw err;
-                console.log(res);
-                db.close();
-                return res
-            })
-        })
+    // finds mongo document matching values from a list
+    findIn: async function(key, list, collection){
+        try{
+            // connect to mongo host
+            var mongoClient = MongoClient(mongoHost, {useUnifiedTopology: true})
+            await mongoClient.connect()
+
+            // connect to DB
+            let dbo = mongoClient.db(mongoDbName)
+            // select mongo collection
+            let output = await dbo.collection(collection).findOne({key:{$in: list}})
+
+            result = output
+        }
+        catch(err){
+            console.log(err)
+            result  = false
+        }
+        finally{
+            await mongoClient.close();
+            return await Promise.resolve(result)
+        }
     },
     updateOne: function(filterKey, filterValue, updateKey, updateValue, collection){
         MongoClient.connect(mongoHost, (err, db) => {
@@ -71,25 +93,32 @@ module.exports = {
             })
         })
     },
-    exists: function(jsonData, collection){
-        MongoClient.connect(mongoHost, (err, db) => {
-            if (err) throw err;
+    exists: async function(jsonQuery, collection){
+        let result
+        try{
+            // connect to mongo host
+            var mongoClient = MongoClient(mongoHost, {useUnifiedTopology: true})
+            await mongoClient.connect()
 
-            var dbo = db.db(mongoDbName);
-            var dbResponse = dbo.collection(collection).find(jsonData).toArray((err, res) => {
-                if (err) throw err;
-                console.log(res.length);
-                db.close();
-                if (res.length > 0){
-                    console.log("true");
-                    return true
-                }
-                else{
-                    return false
-                }
-            })
-            console.log("dbResponse: " + dbResponse)
-        })
-        console.log("exists function end")
+            // connect to DB
+            let dbo = mongoClient.db(mongoDbName)
+            // select mongo collection
+            let output = await dbo.collection(collection).findOne(jsonQuery)
+
+            if(output !== null && output !== undefined){
+                result = true
+            }
+            else{
+                result = false
+            }
+        }
+        catch(err){
+            console.log(err)
+            result  = false
+        }
+        finally{
+            await mongoClient.close();
+            return await Promise.resolve(result)
+        }
     }
 }

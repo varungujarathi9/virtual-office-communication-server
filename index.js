@@ -64,14 +64,27 @@ app.post('/register',(req,res)=>{
   res.send(registrationResponse)
 })
 
+async function f() {
+
+  let promise = new Promise((resolve, reject) => {
+    setTimeout(() => resolve("done!"), 1000)
+  });
+
+  let result = await promise; // wait until the promise resolves (*)
+
+  return result
+}
+
 // user login endpoint
-app.post('/login',(req,res)=>{
+app.post('/login', async (req,res)=>{
   console.log("Request : " + JSON.stringify(req.body))
   var loginResponse = {}
   if(req.body.hasOwnProperty('username') && req.body.hasOwnProperty('password')) {
     try {
-      if(mongoHelper.exists({"username":req.body["username"]},"users").then() == true){
-        if(mongoHelper.exists({"username":req.body["username"], "password": req.body["password"]},"users") == true){
+      // check if username exists
+      if(await mongoHelper.exists({"username":req.body["username"]},"users") == true){
+        // check if password is correct
+        if(await mongoHelper.exists({"username":req.body["username"], "password": req.body["password"]},"users") == true){
           loginResponse["status"] = "successful"
         }
         else{
@@ -101,6 +114,7 @@ app.post('/login',(req,res)=>{
   console.log("Response: " + JSON.stringify(loginResponse))
   res.send(loginResponse)
 })
+
 
 // add in group
 app.post('/add-member',(req,res)=>{
